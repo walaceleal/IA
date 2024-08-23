@@ -3,20 +3,31 @@ from base_dados_2 import BaseDados
 import numpy as np
 from sklearn.naive_bayes import GaussianNB
 
-dados : np.ndarray = BaseDados.gerar(quantidade = 400)
+# Busco da base de dados categoticos: Texto
+BD = BaseDados()
+dadosCategoricos : np.ndarray = BD.gerar(quantidade = 400)
 
-x = dados[:,0].reshape((-1, 1))
-y = dados[:,1].reshape((-1))
+# Transformo os dados categoricos em dados numéricos
+xTreinamento, yTreinamento = BD.encode(dadosCategoricos)
 
-
+# Treino o modelo Naive Bayes
 NB = GaussianNB()
+NB.fit(X=xTreinamento, y=yTreinamento)
 
-NB.fit(X=x, y=y)
+# Antes de usar o modelo para prever, converto as entradas categóricas em numéricas.
+xCategorico = np.array([
+    ["Ausente"],
+    ["Presente"]
+], dtype=object)
 
-previsao = NB.predict([
-    [0], 
-    [1]
-])
+x = BD.encodeX(xCategorico)
+    
+# Utilizo o modelo e converto para informação legível.
+yCategorico = BD.decodeY(NB.predict(x))
 
-print(previsao)
+previsao = np.ndarray(shape=( xCategorico.shape[0], xCategorico.shape[1] + 1 ), dtype=object)
+previsao[:, 0:xCategorico.shape[1]] = xCategorico[:, :]
+previsao[:, x.shape[1]] = yCategorico
 
+
+print( previsao )
